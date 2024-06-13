@@ -1,7 +1,13 @@
 import pandas as pd
 import pickle
 import os
-from search_quran import search_keywords_in_quran, fetch_complete_surah
+from search_quran import (
+    search_keywords_in_quran,
+    fetch_complete_surah,
+    get_total_surahs,
+    get_biggest_surah,
+    get_shortest_surah,
+)
 
 CACHE_FILE = 'keyword_cache.pkl'
 
@@ -29,8 +35,8 @@ def main():
     # Load cache
     cache = load_cache()
 
-    # Choose option: keyword search or fetch complete surah
-    option = input("Choose an option:\n1. Search by keywords\n2. Fetch complete surah\n").strip()
+    # Choose option
+    option = input("Choose an option:\n1. Search by keywords\n2. Fetch complete surah\n3. Get total number of surahs\n4. Get the biggest surah\n5. Get the shortest surah\n").strip()
 
     if option == '1':
         # Get keywords from user
@@ -48,7 +54,7 @@ def main():
             # Search for the specified keywords in the Quran text
             keyword_verses = search_keywords_in_quran(quran_df, keywords)
             if keyword_verses:
-                results = [f"Surah {surah}, Ayah {ayah}: {verse}\nEntities: {entities}" for surah, ayah, verse, entities in keyword_verses]
+                results = [f"Surah {surah}, Ayah {ayah}: {verse}" for surah, ayah, verse in keyword_verses]
                 cache[keyword_str] = results
                 save_cache(cache)
             else:
@@ -73,7 +79,7 @@ def main():
         complete_surah = fetch_complete_surah(quran_df, surah_number)
 
         if complete_surah:
-            results = [f"Surah {surah}, Ayah {ayah}: {verse}" for surah, ayah, verse in complete_surah]
+            results = [f" Ayah {ayah}: {verse}" for surah, ayah, verse in complete_surah]
         else:
             results = [f"No verses found for Surah {surah_number}."]
 
@@ -82,6 +88,22 @@ def main():
             for result in results:
                 print(result)
                 f.write(result + "\n")
+
+    elif option == '3':
+        # Get total number of surahs
+        total_surahs = get_total_surahs(quran_df)
+        print(f"Total number of Surahs in Quran are: {total_surahs}")
+
+    elif option == '4':
+        # Get the biggest surah
+        biggest_surah, total_verses = get_biggest_surah(quran_df)
+        print(f"The biggest surah is Surah of Quran is: {biggest_surah} with {total_verses} verses.")
+
+    elif option == '5':
+        # Get the shortest surah
+        shortest_surah, total_verses = get_shortest_surah(quran_df)
+        print(f"The shortest surah is Surah of Quran is: {shortest_surah} with {total_verses} verses.")
+
 
     else:
         print("Invalid option selected.")
